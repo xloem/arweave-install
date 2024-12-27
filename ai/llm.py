@@ -47,7 +47,8 @@ def service_str_to_url_key_model(service):
     return url, key, model
 
 SERVICE_SAMBANOVA_LLAMA31 = 'https://f47ef722-8eea-4f95-8d57-02027bdc9401@api.sambanova.ai/v1#Meta-Llama-3.1-405B-Instruct'
-SERVICE_OPENROUTER_LLAMA31 = 'https://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@openrouter.ai/api/v1#meta-llama/llama-3.1-405b-instruct:free'
+#SERVICE_OPENROUTER_LLAMA31 = 'https://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@openrouter.ai/api/v1#meta-llama/llama-3.1-405b-instruct:free'
+SERVICE_OPENROUTER_LLAMA31 = 'https://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@openrouter.ai/api/v1#meta-llama/llama-3.1-405b-instruct:free'
 
 if __name__ == '__main__':
     import argparse
