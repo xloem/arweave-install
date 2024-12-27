@@ -1,0 +1,23 @@
+[Unit]
+Description=Arweave Node Service
+After=network.target
+
+[Service]
+#Type=forking
+Type=simple
+KillMode=none
+RestartKillSignal=SIGINT
+Environment=
+User=@CFG_USER@
+Group=@CFG_GROUP@
+WorkingDirectory=@CFG_ARWEAVE_DIR@
+LimitNOFILE=1000000
+ExecStartPre=/sbin/sysctl -w vm.nr_hugepages=5000
+#ExecStartPre=/usr/bin/env bash -c '(/usr/bin/env pkill epmd || true) && (/usr/bin/env pkill screen || true) && sleep 5 || true'
+#ExecStart=/usr/bin/env screen -dmS arweave CFG_ARWEAVEDIR/bin/start config_file CFG_CONFIGPATH
+#ExecStop=/usr/bin/env bash -c '/usr/bin/env pkill beam || true; sleep 15'
+ExecStart=@CFG_ARWEAVE_DIR@/bin/start log_dir @CFG_LOG_DIR@ config_file @CFG_CONFIG_PATH@
+ExecStop=@CFG_ARWEAVE_DIR@/bin/stop
+
+[Install]
+WantedBy=multi-user.target
