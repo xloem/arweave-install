@@ -17,7 +17,7 @@ $(LOCAL_ARWEAVE_DIR)/bin/arweave: submodules/arweave/rebar.config submodules/arw
 	cd submodules/arweave && ./rebar3 as prod release
 	@echo "Now run make install. Optionally specify INST_USER= and INST_GROUP= to set the user arweave will run as."
 
-install: $(LOCAL_ARWEAVE_DIR)/bin/arweave config.json arweave.service config.json.doc
+install: $(LOCAL_ARWEAVE_DIR)/bin/arweave confs/config.json.in confs/config.json confs/arweave.service ai/config.json.doc
 	mkdir -p "$(ARWEAVE_DIR)"
 	mkdir -p "$(LOG_DIR)"
 	mkdir -p "$(DOC_DIR)"
@@ -27,6 +27,7 @@ install: $(LOCAL_ARWEAVE_DIR)/bin/arweave config.json arweave.service config.jso
 	cp -v confs/arweave.service "$(SYSTEMD_UNIT_DIR)"
 	cp -v ai/config.json.doc "$(DOC_DIR)"/
 	cp -v confs/99-arweave-sysctl.conf "$(SYSCTL_CONF_DIR)"/
+	systemctl daemon-reload
 
 uninstall:
 	-rm -vrf "$(ARWEAVE_DIR)" "$(DOC_DIR)" "$(SYSTEMD_UNIT_DIR)"/arweave.service "$(SYSCTL_CONF_DIR)"/99-arweave-sysctl.conf
