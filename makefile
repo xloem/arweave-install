@@ -37,6 +37,7 @@ uninstall:
 	-rm -vrf "$(ARWEAVE_DIR)" "$(SYSTEMD_UNIT_DIR)"/arweave.service "$(SYSCTL_CONF_DIR)"/99-arweave-sysctl.conf
 	#-rm -vrf "$(DOC_DIR)"
 	systemctl daemon-reload
+	sysctl --system
 	@echo "You may delete $(DATA_DIR), $(LOG_DIR), and/or $(CONFIG_PATH) manually."
 
 $(DATA_DIR)/wallets: $(LOCAL_ARWEAVE_DIR)/bin/arweave
