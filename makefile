@@ -53,23 +53,48 @@ submodules/arweave/rebar.config submodules/arweave/apps/arweave/lib/RandomX/CMak
 	git submodule update --init --recursive --progress --filter=blob:none
 
 # language model generation
-# it performs better with more content from files, but this service provides only short completions, so sed is used to trim the context
-#CONFIG_JSON_CTX = ai/mining-guide.md.sed_trusted_peers ai/ar.erl.sed_show_help submodules/arweave/apps/arweave/include/ar_config.hrl ai/ar_config.erl.sed_parse_opts
-CONFIG_JSON_CTX = ai/mining-guide.md.sed_trusted_peers ai/ar.hrl.sed_defines ai/ar_config.hrl.sed_defines ai/ar_config.hrl.sed_config ai/ar.erl.sed_show_help ai/ar_config.erl.sed_parse_opts
-#CONFIG_JSON_CTX = ai/mining-guide.md.sed_trusted_peers ai/ar.erl.sed_show_help ai/ar.hrl.sed_defines submodules/arweave/apps/arweave/include/ar_config.hrl ai/ar.erl.sed_show_help ai/ar_config.erl.sed_parse_opts
+# larger models perform better with more content from files, but service providers tend to offer them with short input lengths
+# sed is used to trim content lengths
+
+# very trimmed content lengths
+#CONFIG_JSON_CTX = ai/mining-guide.md.sed_trusted_peers ai/vdf.md.sed_team_servers ai/ar.hrl.sed_defines ai/ar_config.hrl.sed_defines ai/ar_config.hrl.sed_config ai/erl_sed_features ai/ar.erl.sed_show_help ai/ar_config.erl.sed_parse_opts
+
+# untrimmed content
+#CONFIG_JSON_CTX = submodules/docs.arweave.org-info/mining/mining-guide.md submodules/docs.arweave.org-info/mining/vdf.md submodules/docs.arweave.org-info/mining/examples.md submodules/arweave/apps/arweave/include/ar.hrl submodules/arweave/apps/arweave/include/ar_config.hrl submodules/arweave/apps/arweave/src/ar.erl submodules/arweave/apps/arweave/src/ar_config.erl ai/erl_sed_features ai/arweave_release.json
+
+# compromise
+CONFIG_JSON_CTX = submodules/docs.arweave.org-info/mining/mining-guide.md ai/vdf.md.sed_team_servers submodules/arweave/apps/arweave/include/ar.hrl submodules/arweave/apps/arweave/include/ar_config.hrl ai/ar.erl.sed_show_help submodules/arweave/apps/arweave/src/ar_config.erl ai/erl_sed_features
+
 ai/mining-guide.md.sed_trusted_peers: submodules/docs.arweave.org-info/mining/mining-guide.md
-	sed -n '/nodes that can be used as trusted peers:/{:1;p;n;/^$$/!b1}' < $^ > $@
+	sed -n '/nodes that can be used as trusted peers:/{:1;p;n;/^$$/!b1}' < $< > $@
+	@[ -s $@ ] || { echo '$@: update sed line for new doc content'; false; }
+ai/vdf.md.sed_team_servers: submodules/docs.arweave.org-info/mining/vdf.md
+	sed -n '/operates.*VDF servers.*can be used by any miner/{:1;p;n;b1}' < $< > $@
+	@[ -s $@ ] || { echo '$@: update sed line for new doc content'; false; }
 ai/ar.erl.sed_show_help: submodules/arweave/apps/arweave/src/ar.erl
-	sed -n '/^show_help() ->/{:1;p;n;/erlang:halt/!b1}' < $^ > $@
+	sed -n '/^show_help() ->/{:1;p;n;/erlang:halt/!b1}' < $< > $@
+	@[ -s $@ ] || { echo '$@: update sed line for new doc content'; false; }
 ai/ar_config.hrl.sed_config: submodules/arweave/apps/arweave/include/ar_config.hrl
-	sed -n '/^%% @doc Startup options with default values./{:1;p;n;/})./!b1}' < $^ > $@
+	sed -n '/^%% @doc Startup options with default values./{:1;p;n;/})./!b1}' < $< > $@
+	@[ -s $@ ] || { echo '$@: update sed line for new doc content'; false; }
 ai/ar_config.hrl.sed_defines: submodules/arweave/apps/arweave/include/ar_config.hrl
-	sed -n '/^-define/p' < $^ > $@
+	sed -n '/^-define/p' < $< > $@
+	@[ -s $@ ] || { echo '$@: update sed line for new doc content'; false; }
 ai/ar_config.erl.sed_parse_opts: submodules/arweave/apps/arweave/src/ar_config.erl
-	sed -n '/^%% @doc Parse the configuration options./{:1;p;n;/^[a-oq-z]/!b1}' < $^ > $@
+	sed -n '/^%% @doc Parse the configuration options./{:1;p;n;/^[a-oq-z]/!b1}' < $< > $@
+	@[ -s $@ ] || { echo '$@: update sed line for new doc content'; false; }
 ai/ar.hrl.sed_defines: submodules/arweave/apps/arweave/include/ar.hrl
-	sed -n '/^-define/p' < $^ > $@
+	sed -n '/^-define/p' < $< > $@
+	@[ -s $@ ] || { echo '$@: update sed line for new doc content'; false; }
+ai/erl_sed_features: submodules/arweave/apps/arweave/src/*.erl
+	{ echo 'This is a list of all the feature flags that can be specified via `enables` or `disables`, extracted from the source by searching for mentions of these lists.'; sed -ne 's!.*\(lists:member(.*, Config\#config.*able)\).*!\1!p' submodules/arweave/apps/arweave/src/*.erl; } < $< > $@
+	@[ -s $@ ] || { echo '$@: update sed line for new doc content'; false; }
+ai/arweave_release.json: submodules/arweave/rebar.config
+	wget https://api.github.com/repos/ArweaveTeam/arweave/releases/tags/"$$(cd submodules/arweave && git describe --tags --long | sed 's/-[^-]*-[^-]*$$//')" -O "$@"
+	@[ -s $@ ] || { echo '$@: update sed line for new doc content'; false; }
+
 confs/config.json.in: ai/llm.py $(CONFIG_JSON_CTX)
-	python3 ai/llm.py --max-tokens 512 --prompt "Generate the content for config.json to install on a user's system. Use the template variables @CFG_DATA_DIR@, @CFG_LOG_DIR@, and @CFG_MINING_ADDR@. Do not place backticks around your reply nor provide commentary. The config file must have only and all needed values provided to run the node correctly as-is, such as trusted peers. storage_modules should be an empty multiline list as the user must configure these manually. Include only the important options." --files $(CONFIG_JSON_CTX) | tee $@
+	python3 ai/llm.py --max-tokens 16384 --prompt "Generate the content for a default config.json to install on a user's system. Use the template variables @CFG_DATA_DIR@, @CFG_LOG_DIR@, and @CFG_MINING_ADDR@. Keep it very simple and be sure to properly configure trusted peers, VDF, and huge pages for a common system. Otherwise, do not guess reasonable values for most systems unless they are the precise defaults or instructions. Include a completely empty multiline entry for storage modules for the user will fill in. Your output should be valid JSON and not decorated with backticks or comments." --files $(CONFIG_JSON_CTX) | tee $@
+
 #ai/config.json.doc.in: ai/llm.py $(CONFIG_JSON_CTX) confs/config.json.in
 #	python3 ai/llm.py --max-tokens 2048 --prompt "Generate the content for basic documentation of the $(CONFIG_PATH) or @CFG_CONFIG_PATH@ file. The autogenerated template for this file is in your system prompt. This file is the only configuration provided to the node. Make it clear the documentation (as well as the default-installed config file) is auto-generated via a language model. Any use of the template variables @CFG_DATA_DIR@, @CFG_MINING_ADDR@, @CFG_ARWEAVE_DIR@, @CFG_LOG_DIR@, or @CFG_CONFIG_PATH@ will be automatically replaced with correct values. The documentation should simply describe what the user needs to change or add from the autogenerated file to optimize their system. Do not describe extra bells and whistles." --files $(CONFIG_JSON_CTX) confs/config.json.in | tee $@

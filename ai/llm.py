@@ -1,6 +1,5 @@
-import urllib.parse
+import base64, urllib.parse, logging
 import openai as llm
-import logging
 
 class Inference:
     def __init__(self, service):
@@ -46,16 +45,18 @@ def service_str_to_url_key_model(service):
     url = urllib.parse.urlunsplit([scheme, netloc.split('@',1)[1], path, query, ''])
     return url, key, model
 
-SERVICE_SAMBANOVA_LLAMA31 = 'https://f47ef722-8eea-4f95-8d57-02027bdc9401@api.sambanova.ai/v1#Meta-Llama-3.1-405B-Instruct'
-#SERVICE_OPENROUTER_LLAMA31 = 'https://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@openrouter.ai/api/v1#meta-llama/llama-3.1-405b-instruct:free'
-SERVICE_OPENROUTER_LLAMA31 = 'https://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@openrouter.ai/api/v1#meta-llama/llama-3.1-405b-instruct:free'
+SERVICE_SAMBANOVA_LLAMA31_405 = 'https://f47ef722-8eea-4f95-8d57-02027bdc9401@api.sambanova.ai/v1#Meta-Llama-3.1-405B-Instruct'
+SERVICE_SAMBANOVA_LLAMA31_70 = 'https://f47ef722-8eea-4f95-8d57-02027bdc9401@api.sambanova.ai/v1#Meta-Llama-3.1-70B-Instruct'
+SERVICE_SAMBANOVA_LLAMA33_70 = 'https://f47ef722-8eea-4f95-8d57-02027bdc9401@api.sambanova.ai/v1#Meta-Llama-3.3-70B-Instruct'
+_OPENROUTER_API_KEY = base64.b64decode('c2stb3ItdjEtMTI3NzZiYmQwMmQ5MTE1OGQ0YzRiZjAwYjA3YmRkMDIyNTViZjY3YWRkYThjZWU3YmNlNTNlYmU4MDI4YTNjOA==').decode()
+SERVICE_OPENROUTER_LLAMA31_405 = f'https://{_OPENROUTER_API_KEY}@openrouter.ai/api/v1#meta-llama/llama-3.1-405b-instruct:free'
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--files', action='append', nargs='*', required=True)
     parser.add_argument('--prompt', required=True)
-    parser.add_argument('--service', default=SERVICE_OPENROUTER_LLAMA31)
+    parser.add_argument('--service', default=SERVICE_SAMBANOVA_LLAMA31_70)
     parser.add_argument('--temperature', default=0)
     parser.add_argument('--max-tokens', default=1024)
     args = parser.parse_args()

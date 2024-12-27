@@ -1,7 +1,4 @@
 {
-  "data_dir": "@CFG_DATA_DIR@",
-  "log_dir": "@CFG_LOG_DIR@",
-  "mining_addr": "@CFG_MINING_ADDR@",
   "peers": [
     "ams-1.eu-central-1.arweave.xyz",
     "blr-1.ap-central-1.arweave.xyz",
@@ -14,26 +11,17 @@
     "lim-1.de.europe.arweave.xyz",
     "fsn-1.de.europe.arweave.xyz"
   ],
+  "vdf_server_trusted_peers": [
+    "vdf-server-3.arweave.xyz",
+    "vdf-server-4.arweave.xyz"
+  ],
+  "enable": [
+    "randomx_large_pages"
+  ],
+  "data_dir": "@CFG_DATA_DIR@",
+  "log_dir": "@CFG_LOG_DIR@",
+  "mining_addr": "@CFG_MINING_ADDR@",
   "storage_modules": [
     
-  ],
-  "max_propagation_peers": 16,
-  "max_block_propagation_peers": 1000,
-  "requests_per_minute_limit": 900,
-  "disk_pool_data_root_expiration_time": 1800,
-  "max_disk_pool_buffer_mb": 2000,
-  "max_disk_pool_data_root_buffer_mb": 50,
-  "disk_cache_size_mb": 5120,
-  "sync_jobs": 100,
-  "disk_pool_jobs": 20,
-  "block_pollers": 10,
-  "join_workers": 10,
-  "max_connections": 1024,
-  "max_gateway_connections": 128,
-  "max_poa_option_depth": 500,
-  "packing_rate": 1000,
-  "max_nonce_limiter_validation_thread_count": 16,
-  "max_nonce_limiter_last_step_validation_thread_count": 16,
-  "block_throttle_by_ip_interval": 1000,
-  "block_throttle_by_solution_interval": 2000
+  ]
 }
