@@ -30,10 +30,13 @@ install: $(LOCAL_ARWEAVE_DIR)/bin/arweave confs/config.json.in confs/config.json
 	cp -v confs/99-arweave-sysctl.conf "$(SYSCTL_CONF_DIR)"/
 	sysctl --system
 	systemctl daemon-reload
+	systemctl enable arweave
 
 uninstall:
+	-systemctl stop arweave
 	-rm -vrf "$(ARWEAVE_DIR)" "$(SYSTEMD_UNIT_DIR)"/arweave.service "$(SYSCTL_CONF_DIR)"/99-arweave-sysctl.conf
 	#-rm -vrf "$(DOC_DIR)"
+	systemctl daemon-reload
 	@echo "You may delete $(DATA_DIR), $(LOG_DIR), and/or $(CONFIG_PATH) manually."
 
 $(DATA_DIR)/wallets: $(LOCAL_ARWEAVE_DIR)/bin/arweave
