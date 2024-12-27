@@ -4,8 +4,7 @@ import openai as llm
 class Inference:
     def __init__(self, service):
         url, key, model = service_str_to_url_key_model(service)
-        self.llm = llm.OpenAI(base_url = url)
-        self.llm.api_key = key
+        self.llm = llm.OpenAI(base_url = url, api_key = key)
         self.model = model
     def generate(self, prompt, *files, system_prompt_prefix = 'Below are contextual datafiles.\n', file_prefix = '\n# {filename}\n', file_suffix = '', system_prompt_suffix = '', **kwparams):
         system_prompt = system_prompt_prefix
