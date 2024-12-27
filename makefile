@@ -8,13 +8,14 @@ DATA_DIR ?= $(PREFIX)/var/lib/arweave
 DOC_DIR ?= $(PREFIX)/share/doc/arweave
 LOG_DIR ?= /var/log/arweave
 SYSCTL_CONF_DIR ?= /etc/sysctl.d
+SYSTEMD_UNIT_DIR ?= $(PREFIX)/lib/systemd/system
 
 LOCAL_ARWEAVE_DIR = submodules/arweave/_build/prod/rel/arweave
 
 $(LOCAL_ARWEAVE_DIR)/bin/arweave: submodules/arweave/rebar.config submodules/arweave/apps/arweave/lib/RandomX/CMakeLists.txt
 	# build arweave
 	cd submodules/arweave && ./rebar3 as prod release
-	echo "Now run make install. Optionally specify INST_USER= and INST_GROUP= to set the user arweave will run as."
+	@echo "Now run make install. Optionally specify INST_USER= and INST_GROUP= to set the user arweave will run as."
 
 install: $(LOCAL_ARWEAVE_DIR)/bin/arweave config.json arweave.service config.json.doc
 	mkdir -p "$(ARWEAVE_DIR)"
@@ -23,13 +24,13 @@ install: $(LOCAL_ARWEAVE_DIR)/bin/arweave config.json arweave.service config.jso
 	cp -va "$(LOCAL_ARWEAVE_DIR)"/. "$(ARWEAVE_DIR)"/.
 	-chown $(USER):$(GROUP) -R "$(ARWEAVE_DIR)" "$(DATA_DIR)" "$(LOG_DIR)"
 	-cp --no-clobber -v confs/config.json "$(CONFIG_PATH)" 
-	cp -v confs/arweave.service "$(PREFIX)"/lib/systemd/system/
+	cp -v confs/arweave.service "$(SYSTEMD_UNIT_DIR)"
 	cp -v ai/config.json.doc "$(DOC_DIR)"/
 	cp -v confs/99-arweave-sysctl.conf "$(SYSCTL_CONF_DIR)"/
 
 uninstall:
-	-rm -vrf "$(ARWEAVE_DIR)" "$(DOC_DIR)"
-	echo "You may delete $(DATA_DIR) and/or $(LOG_DIR) manually."
+	-rm -vrf "$(ARWEAVE_DIR)" "$(DOC_DIR)" "$(SYSTEMD_UNIT_DIR)"/arweave.service "$(SYSCTL_CONF_DIR)"/99-arweave-sysctl.conf
+	@echo "You may delete $(DATA_DIR), $(LOG_DIR), and/or $(CONFIG_PATH) manually."
 
 $(DATA_DIR)/wallets: $(LOCAL_ARWEAVE_DIR)/bin/arweave
 	mkdir -p "$(DATA_DIR)"
